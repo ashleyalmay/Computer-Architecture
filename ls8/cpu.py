@@ -22,7 +22,14 @@ class CPU:
         self.ops[PRN] = self.PRN
         self.ops[HLT] = self.HLT
         self.ops[MUL] = self.MUL
+        self.ops[POP] = self.POP
+        self.ops[PUSH] = self.PUSH
         self.running = False
+
+
+    def POP():
+
+    def PUSH():
 
 
     def ram_read(self, address):
