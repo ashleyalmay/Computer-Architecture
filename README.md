@@ -10,11 +10,11 @@
 
 - [done] Inventory what is here
 - [done] Implement the `CPU` constructor
-- [ ] Add RAM functions `ram_read()` and `ram_write()`
-- [ ] Implement the core of `run()`
-- [ ] Implement the `HLT` instruction handler
-- [ ] Add the `LDI` instruction
-- [ ] Add the `PRN` instruction
+- [done] Add RAM functions `ram_read()` and `ram_write()`
+- [done] Implement the core of `run()`
+- [done] Implement the `HLT` instruction handler
+- [done] Add the `LDI` instruction
+- [done] Add the `PRN` instruction
 
 ### Day 2: Add the ability to load files dynamically, get `mult.ls8` running
 
