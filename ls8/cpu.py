@@ -6,6 +6,9 @@ HLT = 0b00000001
 LDI = 0b10000010
 PRN = 0b01000111
 MUL = 0b10100010
+PUSH = 0b01000101
+POP = 0b01000110
+
 
 class CPU:
     """Main CPU class."""
@@ -25,11 +28,7 @@ class CPU:
         self.ops[POP] = self.POP
         self.ops[PUSH] = self.PUSH
         self.running = False
-
-
-    def POP():
-
-    def PUSH():
+        self.sp = len(self.ram)
 
 
     def ram_read(self, address):
@@ -39,9 +38,9 @@ class CPU:
         self.ram[address] = value
 
     def MUL(self):
-        registerA = self.ram_read(self.pc+1)
-        registerB = self.ram_read(self.pc+2)
-        self.alu('MUL',registerA,registerB)
+        reg_a = self.ram[self.pc + 1]
+        reg_b = self.ram[self.pc + 2]
+        self.reg[reg_a] *= self.reg[reg_b]
         self.pc += 3
 
     def HLT(self):
@@ -51,12 +50,22 @@ class CPU:
     def LDI(self):
         address = self.ram[self.pc + 1]
         value = self.ram[self.pc + 2]
-        self.ram_write(address, value)
+        self.reg[address] = value
         self.pc += 3
 
     def PRN(self):
         address = self.ram[self.pc + 1]
-        print(self.ram_read(address))
+        print(self.reg[address])
+        self.pc += 2
+
+    def PUSH(self):
+        self.sp -= 1
+        self.ram_write(self.reg[self.ram[self.pc + 1]], self.sp)
+        self.pc += 2
+
+    def POP(self):
+        self.reg[self.ram[self.pc + 1]] =self.ram_read(self.sp)
+        self.sp += 1
         self.pc += 2
 
     def load(self):
@@ -70,7 +79,7 @@ class CPU:
         
         try:
             #with open('examples/' + sys.argv[1]) as f:
-            with open('examples/' + 'mult.ls8') as f:
+            with open('ls8/examples/' + 'stack.ls8') as f:
                 for line in f:
                     line = line.strip()
                     temp = line.split()
@@ -80,12 +89,10 @@ class CPU:
                             continue
                     try:
                         self.ram[address] = int(temp[0], 2)
-                        
                     except ValueError:
                         print(f"Invalid number: {temp[0]}")
                         sys.exit(1)
                     address += 1
-
         except FileNotFoundError:
                 print(f"Couldn't open {sys.argv[1]}")
                 sys.exit(1)
@@ -94,7 +101,7 @@ class CPU:
             sys.exit(3)
 
     def alu(self, op, reg_a, reg_b):
-        """ALU operations."""
+        """ALU operations. NOT USING RIP"""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
@@ -107,6 +114,7 @@ class CPU:
         Handy function to print out the CPU state. You might want to call this
         from run() if you need help debugging.
         """
+        
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
@@ -131,25 +139,6 @@ class CPU:
             op_handler = self.ops[ir]
             op_handler()
 
-'''            
-            operand_a = self.ram_read(self.pc+1)
-            operand_b = self.ram_read(self.pc+2)
-
-
-            if ir == 0b10000010:
-                reg_num = self.ram[self.pc + 1]
-                value = self.ram[self.pc + 2]
-                self.reg[reg_num] = value
-                self.pc += 3
-
-            elif ir == 0b01000111:
-                reg_num = self.ram[self.pc + 1]
-                print(self.reg[reg_num])
-                self.pc += 2
-
-            elif ir == 0b00000001:
-                self.running = False
-'''
 
 
 
