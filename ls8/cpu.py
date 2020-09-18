@@ -8,7 +8,9 @@ PRN = 0b01000111
 MUL = 0b10100010
 PUSH = 0b01000101
 POP = 0b01000110
-
+CALL = 0b01010000
+RET = 0b00010001
+ADD = 0b10100000
 
 class CPU:
     """Main CPU class."""
@@ -27,9 +29,11 @@ class CPU:
         self.ops[MUL] = self.MUL
         self.ops[POP] = self.POP
         self.ops[PUSH] = self.PUSH
+        self.ops[CALL] = self.CALL
+        self.ops[RET] = self.RET
+        self.ops[ADD] = self.ADD
         self.running = False
         self.sp = len(self.ram)
-
 
     def ram_read(self, address):
         return self.ram[address]
@@ -64,9 +68,18 @@ class CPU:
         self.pc += 2
 
     def POP(self):
-        self.reg[self.ram[self.pc + 1]] =self.ram_read(self.sp)
+        self.reg[self.ram[self.pc + 1]] = self.ram_read(self.sp)
         self.sp += 1
         self.pc += 2
+
+    def CALL(self):
+        self.sp -= 1
+        self.ram_write(self.pc +2, self.sp)
+        self.pc = self.reg[self.ram[self.pc + 1]]
+
+    def RET(self):
+        self.pc = self.ram_read(self.sp)
+        self.sp += 1
 
     def load(self):
         """Load a program into memory."""
@@ -79,7 +92,7 @@ class CPU:
         
         try:
             #with open('examples/' + sys.argv[1]) as f:
-            with open('ls8/examples/' + 'stack.ls8') as f:
+            with open('ls8/examples/' + 'call.ls8') as f:
                 for line in f:
                     line = line.strip()
                     temp = line.split()
@@ -100,14 +113,11 @@ class CPU:
             print("Program was empty!")
             sys.exit(3)
 
-    def alu(self, op, reg_a, reg_b):
-        """ALU operations. NOT USING RIP"""
-
-        if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
-        else:
-            raise Exception("Unsupported ALU operation")
+    def ADD(self):
+        reg_a = self.ram[self.pc + 1]
+        reg_b = self.ram[self.pc + 2]
+        self.reg[reg_a] += self.reg[reg_b]
+        self.pc += 3
 
     def trace(self):
         """
