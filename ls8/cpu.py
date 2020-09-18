@@ -11,6 +11,11 @@ POP = 0b01000110
 CALL = 0b01010000
 RET = 0b00010001
 ADD = 0b10100000
+CMP = 0b10100111
+JMP = 0b01010100
+JEQ = 0b01010101
+JNE = 0b01010110
+
 
 class CPU:
     """Main CPU class."""
@@ -32,6 +37,14 @@ class CPU:
         self.ops[CALL] = self.CALL
         self.ops[RET] = self.RET
         self.ops[ADD] = self.ADD
+        self.ops[CMP] = self.CMP
+        self.ops[JMP] = self.JMP
+        self.ops[JEQ] = self.JEQ
+        self.ops[JNE] = self.JNE
+        self.E = 0
+        self.L = 0
+        self.G = 0
+
         self.running = False
         self.sp = len(self.ram)
 
@@ -49,7 +62,6 @@ class CPU:
 
     def HLT(self):
         self.running = False
-        #stop program
         
     def LDI(self):
         address = self.ram[self.pc + 1]
@@ -81,6 +93,42 @@ class CPU:
         self.pc = self.ram_read(self.sp)
         self.sp += 1
 
+    def CMP(self):
+        a = self.ram[self.pc + 1]
+        b = self.ram[self.pc + 2]
+
+        if self.reg[a] == self.reg[b]:
+            self.L = 0
+            self.G = 0
+            self.E = 1
+        elif self.reg[a] > self.reg[b]:
+            self.L = 1
+            self.G = 0
+            self.E = 0
+        elif self.reg[a] < self.reg[b]:
+            self.G = 1
+            self.L = 0
+            self.E = 0
+        else:
+            print("CMP broke look at this again")
+        self.pc += 3
+        
+    def JMP(self):
+        f = self.ram[self.pc + 1]
+        self.pc = self.reg[f]
+
+    def JEQ(self):
+        if self.E == 1:
+            self.pc = self.reg[self.ram[self.pc + 1]]
+        else:
+            self.pc += 2
+
+    def JNE(self):
+        if self.E == 0:
+            self.pc = self.reg[self.ram[self.pc + 1]]
+        else:
+            self.pc += 2
+
     def load(self):
         """Load a program into memory."""
 
@@ -92,7 +140,7 @@ class CPU:
         
         try:
             #with open('examples/' + sys.argv[1]) as f:
-            with open('ls8/examples/' + 'call.ls8') as f:
+            with open('ls8/examples/' + 'sctest.ls8') as f:
                 for line in f:
                     line = line.strip()
                     temp = line.split()
